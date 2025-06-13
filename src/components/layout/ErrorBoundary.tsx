@@ -1,6 +1,7 @@
 // src/components/layout/ErrorBoundary.tsx
 // Error Boundary para prevenir crashes que afectan el estado del usuario
 
+
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
