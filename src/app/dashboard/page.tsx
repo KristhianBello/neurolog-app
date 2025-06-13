@@ -256,14 +256,14 @@ function AccessibleChildren({ children, loading }: AccessibleChildrenProps) {
               <div className="mt-4 space-y-2">
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>Actividad semanal</span>
-                  <span>{child.weekly_logs || 0}/7</span>
+                  <span>{child.weekly_logs ?? 0}/7</span>
                 </div>
                 <Progress 
-                  value={((child.weekly_logs || 0) / 7) * 100} 
+                  value={((child.weekly_logs ?? 0) / 7) * 100} 
                   className="h-2"
                   indicatorClassName={
-                    (child.weekly_logs || 0) >= 5 ? "bg-green-500" :
-                    (child.weekly_logs || 0) >= 3 ? "bg-yellow-500" : "bg-red-500"
+                    (child.weekly_logs ?? 0) >= 5 ? "bg-green-500" :
+                    (child.weekly_logs ?? 0) >= 3 ? "bg-yellow-500" : "bg-red-500"
                   }
                 />
               </div>
@@ -423,7 +423,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            {greeting()}, {user?.user_metadata?.full_name?.split(' ')[0] || 'Usuario'}
+            {greeting()}, {user?.full_name?.split(' ')[0] || 'Usuario'}
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
             Aquí está el resumen de hoy para tus niños en seguimiento
