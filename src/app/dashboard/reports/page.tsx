@@ -61,6 +61,25 @@ function calculateImprovementTrend(logs: any[]): number {
   return secondAvg - firstAvg;
 }
 
+function filterLogs(
+  logs: any[],
+  selectedChild: string,
+  dateRange: DateRange | undefined
+): any[] {
+  return logs.filter(log => {
+    if (selectedChild !== 'all' && log.child_id !== selectedChild) {
+      return false;
+    }
+    if (dateRange?.from && new Date(log.created_at) < dateRange.from) {
+      return false;
+    }
+    if (dateRange?.to && new Date(log.created_at) > dateRange.to) {
+      return false;
+    }
+    return true;
+  });
+}
+
 export default function ReportsPage() {
   const { user } = useAuth();
   const { children, loading: childrenLoading } = useChildren();
@@ -75,21 +94,7 @@ export default function ReportsPage() {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   // Filtrar logs según selecciones
-  const filteredLogs = logs.filter(log => {
-    if (selectedChild !== 'all' && log.child_id !== selectedChild) {
-      return false;
-    }
-    
-    if (dateRange?.from && new Date(log.created_at) < dateRange.from) {
-      return false;
-    }
-    
-    if (dateRange?.to && new Date(log.created_at) > dateRange.to) {
-      return false;
-    }
-    
-    return true;
-  });
+  const filteredLogs = filterLogs(logs, selectedChild, dateRange);
 
   // Calcular métricas
   const metrics = {
