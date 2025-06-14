@@ -26,18 +26,18 @@ interface AdvancedInsightsProps {
 // TIMEPATTERNS COMPONENT
 // ================================================================
 
-export function TimePatterns({ logs }: TimePatternsProps) {
+export function TimePatterns({ logs }: Readonly<TimePatternsProps>) {
   // Analizar patrones por hora del día
   const hourlyPattern = logs.reduce((acc, log) => {
     const hour = new Date(log.created_at).getHours();
-    acc[hour] = (acc[hour] || 0) + 1;
+    acc[hour] = (acc[hour] ?? 0) + 1;
     return acc;
   }, {} as Record<number, number>);
 
   // Analizar patrones por día de la semana
   const weeklyPattern = logs.reduce((acc, log) => {
     const day = new Date(log.created_at).getDay();
-    acc[day] = (acc[day] || 0) + 1;
+    acc[day] = (acc[day] ?? 0) + 1;
     return acc;
   }, {} as Record<number, number>);
 
