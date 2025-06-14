@@ -106,7 +106,7 @@ function QuickStats({ stats, loading }: Readonly<QuickStatsProps>) {
     return (
       <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={`quickstats-skeleton-${i}`} className="animate-pulse">
             <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between space-x-2">
                 <div className="space-y-2 flex-1">
@@ -161,7 +161,7 @@ function QuickStats({ stats, loading }: Readonly<QuickStatsProps>) {
 // COMPONENTE DE NIÑOS ACCESIBLES RESPONSIVO
 // ================================================================
 
-function AccessibleChildren({ children, loading }: AccessibleChildrenProps) {
+function AccessibleChildren({ children, loading }: Readonly<AccessibleChildrenProps>) {
   if (loading) {
     return (
       <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -290,7 +290,7 @@ function AccessibleChildren({ children, loading }: AccessibleChildrenProps) {
 // COMPONENTE DE REGISTROS RECIENTES RESPONSIVO
 // ================================================================
 
-function RecentLogs({ logs, loading }: RecentLogsProps) {
+function RecentLogs({ logs, loading }: Readonly<RecentLogsProps>) {
   if (loading) {
     return (
       <div className="space-y-3 sm:space-y-4">
