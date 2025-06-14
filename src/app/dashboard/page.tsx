@@ -97,20 +97,23 @@ function QuickStats({ stats, loading }: Readonly<QuickStatsProps>) {
   if (loading) {
     return (
       <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={`quickstats-skeleton-${i}`} className="animate-pulse">
-            <CardContent className="p-3 sm:p-4 md:p-6">
-              <div className="flex items-center justify-between space-x-2">
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
-                  <Skeleton className="h-6 sm:h-8 w-12 sm:w-16" />
-                  <Skeleton className="h-2 sm:h-3 w-14 sm:w-18" />
+        {[...Array(4)].map((_, i) => {
+          const uniqueKey = `quickstats-skeleton-${i}-${Math.random().toString(36).slice(2, 11)}`;
+          return (
+            <Card key={uniqueKey} className="animate-pulse">
+              <CardContent className="p-3 sm:p-4 md:p-6">
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
+                    <Skeleton className="h-6 sm:h-8 w-12 sm:w-16" />
+                    <Skeleton className="h-2 sm:h-3 w-14 sm:w-18" />
+                  </div>
+                  <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg" />
                 </div>
-                <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     );
   }
