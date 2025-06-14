@@ -394,7 +394,6 @@ function TagsInput({ tags, onChange }: Readonly<TagsInputProps>) {
 // ================================================================
 
 export default function LogForm({ log, childId, mode, onSuccess, onCancel }: Readonly<LogFormProps>) {
-  const { user } = useAuth();
   const { children } = useChildren();
   const { createLog, updateLog } = useLogs();
   const [categories, setCategories] = useState<Category[]>([]);

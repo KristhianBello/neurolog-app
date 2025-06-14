@@ -81,7 +81,7 @@ function filterLogs(
 }
 
 export default function ReportsPage() {
-  const { user } = useAuth();
+  useAuth();
   const { children, loading: childrenLoading } = useChildren();
   const { logs, loading: logsLoading } = useLogs();
   
@@ -183,56 +183,68 @@ export default function ReportsPage() {
       </Card>
 
       {/* Métricas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <MetricCard
-          title="Total Registros"
-          value={metrics.totalLogs}
-          icon={FileText}
-          color="blue"
-          subtitle="En el período seleccionado"
-        />
-        
-        <MetricCard
-          title="Estado de Ánimo"
-          value={metrics.averageMood.toFixed(1)}
-          suffix="/5"
-          icon={Heart}
-          color={metrics.averageMood >= 4 ? 'green' : metrics.averageMood >= 3 ? 'orange' : 'red'}
-          subtitle="Promedio del período"
-        />
-        
-        <MetricCard
-          title="Tendencia"
-          value={metrics.improvementTrend > 0 ? '+' : ''}
-          icon={metrics.improvementTrend > 0 ? TrendingUp : metrics.improvementTrend < 0 ? TrendingUp : Target}
-          color={metrics.improvementTrend > 0 ? 'green' : metrics.improvementTrend < 0 ? 'red' : 'gray'}
-          subtitle={metrics.improvementTrend > 0 ? 'Mejorando' : metrics.improvementTrend < 0 ? 'Necesita atención' : 'Estable'}
-        />
-        
-        <MetricCard
-          title="Categorías"
-          value={metrics.activeCategories}
-          icon={PieChart}
-          color="purple"
-          subtitle="Diferentes áreas"
-        />
-        
-        <MetricCard
-          title="Seguimientos"
-          value={metrics.followUpsRequired}
-          icon={AlertTriangle}
-          color={metrics.followUpsRequired > 0 ? 'orange' : 'green'}
-          subtitle="Pendientes"
-        />
-        
-        <MetricCard
-          title="Días Activos"
-          value={metrics.activeDays}
-          icon={Calendar}
-          color="blue"
-          subtitle="Con registros"
-        />
-      </div>
+      {(() => {
+        let moodColor: 'green' | 'orange' | 'red';
+        if (metrics.averageMood >= 4) {
+          moodColor = 'green';
+        } else if (metrics.averageMood >= 3) {
+          moodColor = 'orange';
+        } else {
+          moodColor = 'red';
+        }
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <MetricCard
+              title="Total Registros"
+              value={metrics.totalLogs}
+              icon={FileText}
+              color="blue"
+              subtitle="En el período seleccionado"
+            />
+            
+            <MetricCard
+              title="Estado de Ánimo"
+              value={metrics.averageMood.toFixed(1)}
+              suffix="/5"
+              icon={Heart}
+              color={moodColor}
+              subtitle="Promedio del período"
+            />
+            
+            <MetricCard
+              title="Tendencia"
+              value={metrics.improvementTrend > 0 ? '+' : ''}
+              icon={metrics.improvementTrend > 0 ? TrendingUp : metrics.improvementTrend < 0 ? TrendingUp : Target}
+              color={metrics.improvementTrend > 0 ? 'green' : metrics.improvementTrend < 0 ? 'red' : 'gray'}
+              subtitle={metrics.improvementTrend > 0 ? 'Mejorando' : metrics.improvementTrend < 0 ? 'Necesita atención' : 'Estable'}
+            />
+            
+            <MetricCard
+              title="Categorías"
+              value={metrics.activeCategories}
+              icon={PieChart}
+              color="purple"
+              subtitle="Diferentes áreas"
+            />
+            
+            <MetricCard
+              title="Seguimientos"
+              value={metrics.followUpsRequired}
+              icon={AlertTriangle}
+              color={metrics.followUpsRequired > 0 ? 'orange' : 'green'}
+              subtitle="Pendientes"
+            />
+            
+            <MetricCard
+              title="Días Activos"
+              value={metrics.activeDays}
+              icon={Calendar}
+              color="blue"
+              subtitle="Con registros"
+            />
+          </div>
+        );
+      })()}
 
       {/* Tabs de análisis */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
