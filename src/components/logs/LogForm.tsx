@@ -40,19 +40,21 @@ import type {
   DailyLog, 
   LogInsert, 
   LogUpdate, 
-  Category, 
-  IntensityLevel,
-  LogAttachment,
-  ChildWithRelation
-} from '@/types';
+  Category} from '@/types';
+
+// Define LogAttachment type locally since it's not exported from @/types
+type LogAttachment = {
+  id: string;
+  name: string;
+  url: string;
+  type: 'image' | 'video' | 'audio' | 'document';
+  size: number;
+};
 import { 
-  CalendarIcon, 
   ImageIcon, 
   PlusIcon, 
   TrashIcon, 
   SaveIcon,
-  HeartIcon,
-  AlertTriangleIcon,
   EyeIcon,
   EyeOffIcon,
   TagIcon,
@@ -63,7 +65,6 @@ import {
   UploadIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 // ================================================================
 // ESQUEMAS DE VALIDACIÓN
