@@ -433,7 +433,7 @@ function FiltersBar({ filters, onFiltersChange, children, totalCount, filteredCo
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Intensity Level */}
           <Select 
-            value={filters.intensity_level || 'all'} 
+            value={filters.intensity_level ?? 'all'} 
             onValueChange={(value) => onFiltersChange({ 
               ...filters, 
               intensity_level: value === 'all' ? undefined : value as IntensityLevel
