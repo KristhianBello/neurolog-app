@@ -72,7 +72,7 @@ interface LogCardProps {
   onAddFeedback: (log: LogWithDetails) => void;
 }
 
-function LogCard({ log, onEdit, onViewDetails, onTogglePrivacy, onAddFeedback }: LogCardProps) {
+function LogCard({ log, onEdit, onViewDetails, onTogglePrivacy, onAddFeedback }: Readonly<LogCardProps>) {
   const getIntensityColor = (level: IntensityLevel) => {
     switch (level) {
       case 'low': return 'bg-green-100 text-green-800';
@@ -338,7 +338,7 @@ interface FiltersBarProps {
   filteredCount: number;
 }
 
-function FiltersBar({ filters, onFiltersChange, children, totalCount, filteredCount }: FiltersBarProps) {
+function FiltersBar({ filters, onFiltersChange, children, totalCount, filteredCount }: Readonly<FiltersBarProps>) {
   return (
     <Card>
       <CardHeader>

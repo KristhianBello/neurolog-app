@@ -122,7 +122,7 @@ export function TimePatterns({ logs }: Readonly<TimePatternsProps>) {
 // CORRELATION ANALYSIS COMPONENT
 // ================================================================
 
-export function CorrelationAnalysis({ logs }: CorrelationAnalysisProps) {
+export function CorrelationAnalysis({ logs }: Readonly<CorrelationAnalysisProps>) {
   // Función helper para calcular correlación
   function calculateCorrelation(data: any[], field1: string, field2Func: (item: any) => number): number {
     if (data.length < 2) return 0;
@@ -252,7 +252,7 @@ export function CorrelationAnalysis({ logs }: CorrelationAnalysisProps) {
 // ADVANCED INSIGHTS COMPONENT
 // ================================================================
 
-export function AdvancedInsights({ logs }: AdvancedInsightsProps) {
+export function AdvancedInsights({ logs }: Readonly<AdvancedInsightsProps>) {
   const generateInsights = () => {
     const insights = [];
     
