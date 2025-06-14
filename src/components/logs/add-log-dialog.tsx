@@ -40,7 +40,7 @@ interface FormData {
 
 export function AddLogDialog({ open, onOpenChange, preselectedChildId }: AddLogDialogProps) {
   const [formData, setFormData] = useState<FormData>({
-    child_id: preselectedChildId || '',
+    child_id: preselectedChildId ?? '',
     category_id: '',
     title: '',
     content: '',

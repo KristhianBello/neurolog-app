@@ -271,7 +271,7 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
       setUser(prev => prev ? { ...prev, ...updates } : null);
     } catch (err: any) {
       console.error('❌ Update profile error:', err);
-      setError(err.message || 'Error al actualizar perfil');
+      setError(err.message ?? 'Error al actualizar perfil');
       throw err;
     } finally {
       setLoading(false);

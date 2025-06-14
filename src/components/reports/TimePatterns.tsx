@@ -303,7 +303,7 @@ export function AdvancedInsights({ logs }: AdvancedInsightsProps) {
     // Análisis de categorías
     const categoryCount = logs.reduce((acc, log) => {
       if (log.category_name) {
-        acc[log.category_name] = (acc[log.category_name] || 0) + 1;
+        acc[log.category_name] = (acc[log.category_name] ?? 0) + 1;
       }
       return acc;
     }, {} as Record<string, number>);
