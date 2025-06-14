@@ -3,7 +3,6 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,22 +16,15 @@ import {
   Users, 
   BookOpen, 
   TrendingUp, 
-  Calendar, 
   Heart,
   AlertCircle,
-  Clock,
   Eye,
   Plus,
   BarChart3,
-  Bell,
   Activity,
-  Target,
-  Award,
-  ChevronRight,
-  MoreHorizontal
-} from 'lucide-react';
+  ChevronRight} from 'lucide-react';
 import Link from 'next/link';
-import { format, isToday, isYesterday, startOfWeek, endOfWeek } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // ================================================================
@@ -258,14 +250,22 @@ function AccessibleChildren({ children, loading }: Readonly<AccessibleChildrenPr
                   <span>Actividad semanal</span>
                   <span>{child.weekly_logs ?? 0}/7</span>
                 </div>
-                <Progress 
-                  value={((child.weekly_logs ?? 0) / 7) * 100} 
-                  className="h-2"
-                  indicatorClassName={
-                    (child.weekly_logs ?? 0) >= 5 ? "bg-green-500" :
-                    (child.weekly_logs ?? 0) >= 3 ? "bg-yellow-500" : "bg-red-500"
+                {(() => {
+                  const weeklyLogs = child.weekly_logs ?? 0;
+                  let indicatorClass = "bg-red-500";
+                  if (weeklyLogs >= 5) {
+                    indicatorClass = "bg-green-500";
+                  } else if (weeklyLogs >= 3) {
+                    indicatorClass = "bg-yellow-500";
                   }
-                />
+                  return (
+                    <Progress 
+                      value={(weeklyLogs / 7) * 100} 
+                      className="h-2"
+                      indicatorClassName={indicatorClass}
+                    />
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
@@ -371,9 +371,18 @@ function RecentLogs({ logs, loading }: Readonly<RecentLogsProps>) {
                 <span className="font-medium">{log.child_name}</span>
                 <span className="mx-1">•</span>
                 <span>
-                  {isToday(new Date(log.created_at)) ? 'Hoy' :
-                   isYesterday(new Date(log.created_at)) ? 'Ayer' :
-                   format(new Date(log.created_at), 'dd MMM', { locale: es })}
+                  {(() => {
+                    const createdAt = new Date(log.created_at);
+                    let dateLabel;
+                    if (isToday(createdAt)) {
+                      dateLabel = 'Hoy';
+                    } else if (isYesterday(createdAt)) {
+                      dateLabel = 'Ayer';
+                    } else {
+                      dateLabel = format(createdAt, 'dd MMM', { locale: es });
+                    }
+                    return dateLabel;
+                  })()}
                 </span>
               </div>
               
