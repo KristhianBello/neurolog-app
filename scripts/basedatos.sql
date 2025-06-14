@@ -46,12 +46,20 @@ DROP TABLE IF EXISTS profiles CASCADE;
 -- 2. CREAR TABLAS PRINCIPALES
 -- ================================================================
 
+-- ENUM: user_role_type
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role_type') THEN
+    CREATE TYPE user_role_type AS ENUM ('parent', 'teacher', 'specialist', 'admin');
+  END IF;
+END$$;
+
 -- TABLA: profiles (usuarios del sistema)
 CREATE TABLE profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT NOT NULL,
-  role TEXT CHECK (role IN ('parent', 'teacher', 'specialist', 'admin')) DEFAULT 'parent',
+  role user_role_type DEFAULT 'parent',
   avatar_url TEXT,
   phone TEXT,
   is_active BOOLEAN DEFAULT TRUE,
@@ -90,12 +98,7 @@ CREATE TABLE children (
   emergency_contact JSONB DEFAULT '[]',
   medical_info JSONB DEFAULT '{}',
   educational_info JSONB DEFAULT '{}',
-  privacy_settings JSONB DEFAULT '{
-    "share_with_specialists": true,
-    "share_progress_reports": true,
-    "allow_photo_sharing": false,
-    "data_retention_months": 36
-  }',
+  privacy_settings JSONB DEFAULT '{"share_with_specialists": true, "share_progress_reports": true, "allow_photo_sharing": false, "data_retention_months": 36}',
   created_by UUID REFERENCES profiles(id) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -122,6 +125,22 @@ CREATE TABLE user_child_relations (
   UNIQUE(user_id, child_id, relationship_type)
 );
 
+-- ENUM: intensity_level_type
+DO $$
+DECLARE
+  intensity_levels CONSTANT TEXT[] := ARRAY['low', 'medium', 'high'];
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'intensity_level_type') THEN
+    EXECUTE format('CREATE TYPE intensity_level_type AS ENUM (%s)', 
+      array_to_string(
+        ARRAY(
+          SELECT quote_literal(level) FROM unnest(intensity_levels) AS level
+        ), ','
+      )
+    );
+  END IF;
+END$$;
+
 -- TABLA: daily_logs (registros diarios)
 CREATE TABLE daily_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -130,7 +149,7 @@ CREATE TABLE daily_logs (
   title TEXT NOT NULL CHECK (length(trim(title)) >= 2),
   content TEXT NOT NULL,
   mood_score INTEGER CHECK (mood_score >= 1 AND mood_score <= 10),
-  intensity_level TEXT CHECK (intensity_level IN ('low', 'medium', 'high')) DEFAULT 'medium',
+  intensity_level intensity_level_type DEFAULT 'medium',
   logged_by UUID REFERENCES profiles(id) NOT NULL,
   log_date DATE DEFAULT CURRENT_DATE,
   is_private BOOLEAN DEFAULT FALSE,
@@ -260,11 +279,11 @@ CREATE TRIGGER on_auth_user_created
 CREATE OR REPLACE FUNCTION user_can_access_child(child_uuid UUID)
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM children 
+  RETURN (
+    SELECT COUNT(*) FROM children 
     WHERE id = child_uuid 
       AND created_by = auth.uid()
-  );
+  ) > 0;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -272,11 +291,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE FUNCTION user_can_edit_child(child_uuid UUID)
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM children 
+  RETURN (
+    SELECT COUNT(*) FROM children 
     WHERE id = child_uuid 
       AND created_by = auth.uid()
-  );
+  ) > 0;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -311,7 +330,28 @@ BEGIN
   );
 EXCEPTION
   WHEN OTHERS THEN
-    NULL; -- No fallar por errores de auditoría
+    INSERT INTO audit_logs (
+      table_name,
+      operation,
+      record_id,
+      user_id,
+      user_role,
+      new_values,
+      risk_level
+    ) VALUES (
+      'audit_sensitive_access_error',
+      'ERROR',
+      resource_id,
+      auth.uid(),
+      (SELECT role FROM profiles WHERE id = auth.uid()),
+      jsonb_build_object(
+        'action_type', action_type,
+        'details', action_details,
+        'timestamp', NOW(),
+        'error_message', SQLERRM
+      ),
+      'high'
+    );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -465,19 +505,22 @@ DECLARE
   policy_count INTEGER;
   function_count INTEGER;
   category_count INTEGER;
+  public_schema CONSTANT TEXT := 'public';
+  neurolog_tables CONSTANT TEXT[] := ARRAY['profiles', 'children', 'user_child_relations', 'daily_logs', 'categories', 'audit_logs'];
 BEGIN
   -- Contar tablas
   SELECT COUNT(*) INTO table_count
   FROM information_schema.tables 
-  WHERE table_schema = 'public' 
-    AND table_name IN ('profiles', 'children', 'user_child_relations', 'daily_logs', 'categories', 'audit_logs');
+  WHERE table_schema = public_schema
+    AND table_name = ANY(neurolog_tables);
   
   result := result || 'Tablas creadas: ' || table_count || '/6' || E'\n';
   
-  -- Contar políticas
+  -- Contar políticas solo de las tablas relevantes
   SELECT COUNT(*) INTO policy_count
   FROM pg_policies 
-  WHERE schemaname = 'public';
+  WHERE schemaname = public_schema
+    AND tablename = ANY(neurolog_tables);
   
   result := result || 'Políticas RLS: ' || policy_count || E'\n';
   
@@ -497,7 +540,7 @@ BEGIN
   -- Verificar RLS
   IF (SELECT COUNT(*) FROM pg_class c 
       JOIN pg_namespace n ON n.oid = c.relnamespace 
-      WHERE n.nspname = 'public' 
+      WHERE n.nspname = public_schema
         AND c.relname = 'children' 
         AND c.relrowsecurity = true) > 0 THEN
     result := result || 'RLS: ✅ Habilitado' || E'\n';
