@@ -10,14 +10,17 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical'
+
+export type AuditOperation = 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
+
 export interface Database {
   public: {
     Tables: {
       audit_logs: {
         Row: {
-          id: string
+          operation: AuditOperation
           table_name: string
-          operation: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
           record_id: string | null
           user_id: string | null
           user_role: string | null
@@ -27,7 +30,7 @@ export interface Database {
           ip_address: string | null
           user_agent: string | null
           session_id: string | null
-          risk_level: 'low' | 'medium' | 'high' | 'critical'
+          risk_level: RiskLevel
           created_at: string
         }
         Insert: {
@@ -43,13 +46,12 @@ export interface Database {
           ip_address?: string | null
           user_agent?: string | null
           session_id?: string | null
-          risk_level?: 'low' | 'medium' | 'high' | 'critical'
+          risk_level?: RiskLevel
           created_at?: string
         }
         Update: {
-          id?: string
+          operation?: AuditOperation
           table_name?: string
-          operation?: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
           record_id?: string | null
           user_id?: string | null
           user_role?: string | null
@@ -59,7 +61,7 @@ export interface Database {
           ip_address?: string | null
           user_agent?: string | null
           session_id?: string | null
-          risk_level?: 'low' | 'medium' | 'high' | 'critical'
+          risk_level?: RiskLevel
           created_at?: string
         }
         Relationships: [
