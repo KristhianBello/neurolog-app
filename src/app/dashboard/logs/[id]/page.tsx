@@ -29,20 +29,17 @@ import {
   EditIcon,
   MoreVerticalIcon,
   CalendarIcon,
-  HeartIcon,
   MapPinIcon,
   CloudIcon,
   FileIcon,
   MessageSquareIcon,
   AlertCircleIcon,
   CheckCircleIcon,
-  EyeIcon,
   EyeOffIcon,
   ClockIcon,
   ArrowLeftIcon,
   UserIcon,
   TagIcon,
-  ThermometerIcon,
   ReplyIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -53,7 +50,7 @@ export default function LogDetailPage() {
   const router = useRouter();
   const logId = params.id as string;
   const { user } = useAuth();
-  const { logs, loading, getLogById, addParentFeedback, markAsReviewed } = useLogs();
+  const { loading, getLogById, addParentFeedback, markAsReviewed } = useLogs();
   
   const [log, setLog] = useState<LogWithDetails | null>(null);
   const [feedback, setFeedback] = useState('');
@@ -133,7 +130,14 @@ export default function LogDetailPage() {
   };
 
   const canReview = user?.role === 'specialist' && !log.reviewed_by;
-  const canAddFeedback = user?.role === 'parent' || user?.role === 'family';
+  const canAddFeedback = user?.role === 'parent';
+
+  // Extract mood label to avoid nested ternary in JSX
+  const getMoodLabel = (score: number) => {
+    if (score <= 2) return 'Necesita atención';
+    if (score <= 3) return 'Normal';
+    return 'Muy positivo';
+  };
 
   return (
     <div className="space-y-6">
@@ -146,7 +150,7 @@ export default function LogDetailPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Registro de {log.child_name}
+              Registro de {log.child?.name ?? 'Niño desconocido'}
             </h1>
             <p className="text-gray-600">
               {format(new Date(log.created_at), 'dd MMMM yyyy \'a las\' HH:mm', { locale: es })}
@@ -240,21 +244,16 @@ export default function LogDetailPage() {
               </div>
 
               {/* Mood Score */}
-              {log.mood_score && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Estado de ánimo</h4>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{getMoodEmoji(log.mood_score)}</span>
-                    <div>
-                      <p className="text-lg font-semibold text-gray-900">{log.mood_score}/5</p>
-                      <p className="text-sm text-gray-600">
-                        {log.mood_score <= 2 ? 'Necesita atención' : 
-                         log.mood_score <= 3 ? 'Normal' : 'Muy positivo'}
-                      </p>
-                    </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-2">Estado de ánimo</h4>
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{getMoodEmoji(log.mood_score ?? 0)}</span>
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900">{log.mood_score}/5</p>
+                    <p className="text-sm text-gray-600">{getMoodLabel(log.mood_score ?? 0)}</p>
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Tags */}
               {log.tags && log.tags.length > 0 && (
