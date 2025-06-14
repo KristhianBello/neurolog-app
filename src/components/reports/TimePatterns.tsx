@@ -93,7 +93,7 @@ export function TimePatterns({ logs }: Readonly<TimePatternsProps>) {
         <h4 className="text-sm font-medium mb-2">Distribución por días de la semana</h4>
         <div className="flex space-x-1">
           {dayNames.map((day, index) => {
-            const count = weeklyPattern[index] || 0;
+            const count = weeklyPattern[index] ?? 0;
             const values = Object.values(weeklyPattern);
             const maxCount = values.length > 0 ? Math.max(...values) : 0;
             const intensity = maxCount > 0 ? (count / maxCount) * 100 : 0;
@@ -141,19 +141,23 @@ export function CorrelationAnalysis({ logs }: CorrelationAnalysisProps) {
   }
 
   // Calcular correlación entre estado de ánimo e intensidad
+  const intensityLevelToNumber = (log: any) => {
+    if (log.intensity_level === 'low') return 1;
+    if (log.intensity_level === 'medium') return 2;
+    return 3;
+  };
+
   const moodIntensityCorr = calculateCorrelation(
     logs.filter(l => l.mood_score && l.intensity_level),
     'mood_score',
-    log => log.intensity_level === 'low' ? 1 : log.intensity_level === 'medium' ? 2 : 3
+    intensityLevelToNumber
   );
 
   // Calcular correlación entre categorías y estado de ánimo
   const categoryMoodCorr = logs.reduce((acc, log) => {
     if (!log.mood_score || !log.category_name) return acc;
     
-    if (!acc[log.category_name]) {
-      acc[log.category_name] = { total: 0, count: 0 };
-    }
+    acc[log.category_name] ??= { total: 0, count: 0 };
     
     acc[log.category_name].total += log.mood_score;
     acc[log.category_name].count += 1;
